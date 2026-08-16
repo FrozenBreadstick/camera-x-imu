@@ -1,0 +1,162 @@
+<?xml version="0.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="one_dof_robot">
+
+  <!-- Define Xacro Properties -->
+  <xacro:property name="link_mass" value="1.0"/>
+  <xacro:property name="link_length" value="0.5"/>
+  <xacro:property name="link_radius" value="0.05"/>
+
+  <!-- Fix to world -->
+  <link name="world"/>
+
+  <!-- Fixed joint from Base to World-->
+  <joint name="base_joint" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.01" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Base Link -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder length="0.2" radius="0.1"/>
+      </geometry>
+      <material name="gray">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.2" radius="0.1"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="2.0"/>
+      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/>
+    </inertial>
+  </link>
+
+<!-- Rotating Link -->
+  <link name="arm_link">
+    <visual>
+      <origin xyz="0 ${link_length / 2} 0" rpy="${pi/2} 0 0"/>
+      <geometry>
+        <cylinder length="${link_length}" radius="${link_radius}"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0.0 0.0 0.8 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 ${link_length / 2} 0" rpy="${pi/2} 0 0"/>
+      <geometry>
+        <cylinder length="${link_length}" radius="${link_radius}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 ${link_length / 2} 0" rpy="${pi/2} 0 0"/>
+      <mass value="${link_mass}"/>
+      <inertia ixx="0.002" ixy="0.0" ixz="0.0" iyy="0.002" iyz="0.0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!-- Single Revolute Joint -->
+  <joint name="arm_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="arm_link"/>
+    <origin xyz="0 0 0.1" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-${pi/2}" upper="${pi/2}" effort="10.0" velocity="1.0"/>
+  </joint>
+
+  <!-- IMU Link -->
+  <link name="imu_link"/>
+
+  <!-- IMU Joint -->
+  <joint name="imu_joint" type="fixed">
+    <parent link="arm_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 ${link_length} 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Camera Link -->
+  <link name="camera_link">
+    <visual>
+      <geometry>
+        <box size="0.1 0.05 0.05"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- Camera joint -->
+  <joint name="camera_joint" type="fixed">
+    <parent link="arm_link"/>
+    <child link="camera_link"/>
+    <origin xyz="0 ${link_length} 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Camera Optical Link -->
+  <link name="camera_optical_link" />
+  <joint name="camera_optical_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_optical_link"/>
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+  </joint>
+
+  <!-- ROS2 Control & Gazebo Config -->
+  <ros2_control name="IgnitionSystem" type="system">
+    <hardware>
+      <plugin>ign_ros2_control/IgnitionSystem</plugin>
+    </hardware>
+    <joint name="arm_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <gazebo>
+    <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
+      <parameters>$(find camximu)/config/one_dof_controller.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+  <!-- IMU Sensor -->
+  <gazebo reference="imu_link">
+    <sensor name="imu_sensor" type="imu">
+      <ignition_frame_id>imu_link</ignition_frame_id> <!-- Message header must match URDF link name -->
+      <always_on>1</always_on>
+      <update_rate>100</update_rate>
+      <visualize>true</visualize>
+      <topic>imu</topic>
+    </sensor>
+  </gazebo>
+
+  <!-- Camera Sensor -->
+  <gazebo reference="camera_link">
+    <sensor name="camera_sensor" type="camera">
+      <ignition_frame_id>camera_optical_link</ignition_frame_id> <!-- Message header must match URDF link name -->
+      <always_on>1</always_on>
+      <update_rate>30</update_rate>
+      <visualize>true</visualize>
+      <topic>camera/image_raw</topic>
+      <camera>
+        <horizontal_fov>1.047</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.1</near>
+          <far>100</far>
+        </clip>
+      </camera>
+    </sensor>
+  </gazebo>
+
+</robot>
