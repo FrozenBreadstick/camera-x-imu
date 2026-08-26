@@ -1,18 +1,24 @@
-#ifndef UI_SAMPLE_H
-#define UI_SAMPLE_H
+#ifndef UI_H
+#define UI_H
 
 #include <rclcpp/rclcpp.hpp>
-#include <rcl_interfaces/srv/set_parameters.hpp>
 #include <fstream>
 #include <sstream>
 #include <array>
 #include <stdexcept>
+#include <filesystem>
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QVBoxLayout>
-#include <QMessageBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QMessageBox>
+#include <opencv2/opencv.hpp>
+#include <opencv2/aruco.hpp>
+
+#include <camximu/template/aruco_template.h>
 
 namespace UI
 {
@@ -24,12 +30,17 @@ namespace UI
 
         private:
             void start_simulation();
+            void make_aruco();
+            std::string find_replace(std::string text, std::string find, std::string replace);
+            bool write_file(std::string file_path, std::string file_contents);
 
-            rclcpp::SyncParametersClient::SharedPtr model_swapper_;
+            QLabel* test_label_;
+            QPushButton* test_button_;
 
-            QLabel* _label;
-            QPushButton* _button;
+            QLabel* aruco_maker_label_;
+            QPushButton* aruco_maker_button_;
+            QLineEdit* aruco_maker_namer_;
     };
 }
 
-#endif // UI_SAMPLE_H
+#endif // UI_H

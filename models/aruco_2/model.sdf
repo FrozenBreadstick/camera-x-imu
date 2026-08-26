@@ -1,0 +1,24 @@
+<sdf version="1.7">
+  <model name="aruco_2">
+    <static>true</static>
+    <link name="aruco_2_link">
+      <collision name="aruco_2_collision">
+        <geometry>
+          <mesh>
+            <uri>model://aruco_2/model.dae</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="aruco_2_visual">
+        <geometry>
+          <mesh>
+            <uri>model://aruco_2/model.dae</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>
+    

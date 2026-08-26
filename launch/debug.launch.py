@@ -11,14 +11,6 @@ def generate_launch_description():
             output='screen',
         )
     ld.add_action(ui)
-
-    rviz = Node(
-            package='rviz2',
-            executable='rviz2',
-            name='rviz2',
-            output='screen'
-        )
-    ld.add_action(rviz)
     
     return ld
 

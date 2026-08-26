@@ -62,6 +62,14 @@
       <name>small_crate</name>
       <pose>4 0 0 0 0 0</pose>
     </include>
+
+    <include>
+      <uri>
+        model://aruco_2
+      </uri>
+      <name>aruco_board</name>
+      <pose>2 0 0.2 1.57079632679 0 -1.57079632679</pose>
+    </include>
     
   </world>
 </sdf>

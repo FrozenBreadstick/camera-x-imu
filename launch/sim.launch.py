@@ -39,7 +39,6 @@ def generate_launch_description():
         launch_arguments={'ign_args': [sdf_file, ' -r', ' -s']}.items()
     )
     ld.add_action(gazebo_launch)
-    
 
     state_pub = Node(
         package='robot_state_publisher',
