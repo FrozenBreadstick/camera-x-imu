@@ -12,7 +12,7 @@ def generate_launch_description():
 
     robot_launch_arg = DeclareLaunchArgument(
             'robot',
-            default_value='simple_one_dof',
+            default_value='simple_three_dof',
             description='Which robot to load (without file extension)',
         )
     ld.add_action(robot_launch_arg)
@@ -102,6 +102,34 @@ def generate_launch_description():
         parameters=[{'use_sim_time': True}]
     )
     ld.add_action(rviz)
+
+    mapper = Node(
+        package='camximu',
+        executable='mapper',
+        output='screen'
+    )
+    ld.add_action(mapper)
+
+    camera_solver = Node(
+        package='camximu',
+        executable='camera_solve',
+        output='screen'
+    )
+    ld.add_action(camera_solver)
+
+    imu_solver = Node(
+        package='camximu',
+        executable='imu_solve',
+        output='screen'
+    )
+    ld.add_action(imu_solver)
+
+    ui = Node(
+        package='camximu',
+        executable='ui',
+        output='screen'
+    )
+    ld.add_action(ui)
 
     return ld
 

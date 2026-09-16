@@ -1,0 +1,13 @@
+Kaman filtering
+State + Observations, update state based on observations
+When we get things from sensors, we use a model to predict the state forwad and then update the state
+
+More Degrees of Freedom
+Draw Path
+Attempt ARUCO position estimation
+
+Ceres solver for batch optimisation least square best guess, solving for everything at the same time AFTER an initial guess on a per joint basis
+
+acknowledge the error, the problem doesnt have to be solved always in every context
+
+rotate camera around joint axis, observe the issues

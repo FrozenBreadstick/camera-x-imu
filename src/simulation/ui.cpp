@@ -25,8 +25,17 @@ namespace UI
         layout->addWidget(aruco_maker_namer_);
         layout->addWidget(aruco_maker_button_);
         connect(aruco_maker_button_, &QPushButton::clicked, this, &UI::make_aruco);
-        aruco_maker_namer_->setPlaceholderText("Enter Aruco Name...");
+        aruco_maker_namer_->setPlaceholderText("Enter Aruco Name....");
         // Aruco Label + Button ^^^
+
+        // Camera Label + Button
+        camera_solver_label_ = new QLabel("Solve Camera Position Now", this);
+        camera_solver_button_ = new QPushButton("Solve", this);
+        layout->addWidget(camera_solver_label_);
+        layout->addWidget(camera_solver_button_);
+        connect(camera_solver_button_, &QPushButton::clicked, this, &UI::camera_solver_send_);
+        camera_solver_client_ = this->create_client<std_srvs::srv::Empty>("/camximu/trigger_solve");
+        // Camera Label + Button ^^^
     }
 
     UI::~UI() {
@@ -108,5 +117,20 @@ namespace UI
         file << file_contents;
         file.close();
         return true;
+    }
+
+    void UI::camera_solver_send_() {
+        auto request = std::make_shared<std_srvs::srv::Empty::Request>();
+        RCLCPP_INFO(this->get_logger(), "Sending request camera solver request");
+
+        //Check once without blocking the UI indefinitely
+        if (!camera_solver_client_->service_is_ready()) {
+            RCLCPP_WARN(this->get_logger(), "Service is not available.");
+            return;
+        }
+
+        camera_solver_client_->async_send_request(request, [this](rclcpp::Client<std_srvs::srv::Empty>::SharedFuture future) {
+                    auto response = future.get();
+                });
     }
 }

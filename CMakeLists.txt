@@ -13,13 +13,18 @@ find_package(ament_cmake REQUIRED)
 
 #general dependencies
 find_package(geometry_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(imu_filter_madgwick REQUIRED)
+find_package(SDL2 REQUIRED)
+find_package(std_srvs REQUIRED)
 
 #ui dependencies
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
@@ -36,34 +41,72 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 rosidl_get_typesupport_target(custom_messages ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 #Solver Libraries
-add_library(imu_solve SHARED
+add_executable(imu_solve
   src/solving/imu_solve.cpp
+  src/solving/imu_main.cpp
 )
 target_include_directories(imu_solve PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
 ament_target_dependencies(imu_solve PUBLIC
+  rclcpp
   sensor_msgs
   geometry_msgs
+  tf2_geometry_msgs
+  imu_filter_madgwick
 )
 target_link_libraries(imu_solve PUBLIC 
   Eigen3::Eigen
 )
 
-add_library(camera_solve SHARED
+add_executable(camera_solve
   src/solving/camera_solve.cpp
+  src/solving/camera_main.cpp
 )
 target_include_directories(camera_solve PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
 ament_target_dependencies(camera_solve PUBLIC
+  rclcpp
   sensor_msgs
   geometry_msgs
+  cv_bridge
+  tf2
+  std_srvs
 )
 target_link_libraries(camera_solve PUBLIC 
   ${OpenCV_LIBS}
+)
+
+add_executable(controller
+  src/simulation/dynamic_controller.cpp
+  src/simulation/controller_main.cpp
+)
+target_include_directories(controller PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+ament_target_dependencies(controller PUBLIC
+  rclcpp
+  SDL2
+)
+
+add_executable(mapper
+  src/simulation/mapping.cpp
+  src/simulation/mapping_main.cpp
+)
+target_include_directories(mapper PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+ament_target_dependencies(mapper PUBLIC
+  rclcpp
+  nav_msgs
+  geometry_msgs
+  tf2_ros
+  tf2_geometry_msgs
 )
 
 #UI Executable
@@ -80,6 +123,7 @@ target_include_directories(ui PUBLIC
 ament_target_dependencies(ui PUBLIC
   rclcpp
   cv_bridge
+  std_srvs
 )
 target_link_libraries(ui PUBLIC
   Qt6::Widgets
@@ -91,6 +135,10 @@ target_link_libraries(ui PUBLIC
 install(
   TARGETS
     ui
+    imu_solve
+    camera_solve
+    controller
+    mapper
   DESTINATION lib/${PROJECT_NAME}
 )
 

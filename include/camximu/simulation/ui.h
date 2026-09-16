@@ -17,6 +17,7 @@
 #include <QtWidgets/QMessageBox>
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
+#include <std_srvs/srv/empty.hpp>
 
 #include <camximu/template/aruco_template.h>
 
@@ -33,6 +34,12 @@ namespace UI
             void make_aruco();
             std::string find_replace(std::string text, std::string find, std::string replace);
             bool write_file(std::string file_path, std::string file_contents);
+            void camera_solver_send_();
+
+            rclcpp::Client<std_srvs::srv::Empty>::SharedPtr camera_solver_client_;
+
+            QLabel* camera_solver_label_;
+            QPushButton* camera_solver_button_;
 
             QLabel* test_label_;
             QPushButton* test_button_;
